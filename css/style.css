@@ -1,0 +1,38 @@
+html, body {
+  height: 100%;
+}
+
+div {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  margin: 5px;
+}
+
+#resultsDiv {
+  float: left;
+  height: 100%;
+  width: 15%;
+  flex-direction: column;
+  font-size: 10%;
+}
+
+#productContainerDiv {
+  float: right;
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.productDiv {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  width : 70%;
+}
+
+
