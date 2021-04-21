@@ -12,14 +12,16 @@ NOTE: Displayed product names should match the file name for the product. Exampl
 
 
 //====================Global Variables====================
+'use strict';
 
 //Pointer Setup
 const productDivHead = document.getElementById('productContainerDiv');
 const resultDiv = document.getElementById('resultsDiv');
+const canvasDiv = document.getElementById('chartJSDiv');
 
 //Variables to be used by others
 const numChoices = 3;
-const maxClicks = 25; //down to 10 for testing purposes
+const maxClicks = 10; //down to 10 for testing purposes
 productDivHead.addEventListener('click', selectProduct);
 
 //Variables others use
@@ -35,7 +37,7 @@ function Products (name, imgFilePath){
   this.name = name;
   this.imgFilePath = imgFilePath;
   this.clickCount = 0;
-  this.timesCalled = 0;
+  this.timesSeen = 0;
 
   //Adding itself to the array of all products
   Products.productArray.push(this);
@@ -91,44 +93,35 @@ function productSelectRandom (){
   return target;
 }
 
-//Returns an array of unique numbers that map within productArray
-function selectRandom (){
+//Save current choices array as previous state, generate next product, and compare that vs previous and new choices
+function selectRandom () {
 
-  //Setup the return array of choices
-  choicesTemp = [];
+  //Set up the previous choices and new choices array
+  let lastChoices = choices;
+  let newChoices = [];
+  
+  //Create an array of new index
+  while(newChoices.length < numChoices){
 
-  //first selection doesn't need validation
-  let choice = productSelectRandom();
-  choicesTemp.push(choice);
+    //pick new product object as an option
+    let singleChoice = Products.productArray[productSelectRandom()];
 
-  //As long as the choices array is still not to the set length
-  while(choicesTemp.length < numChoices){
+    //If the single choice is NOT in the array we are looking at return true
+    let backwardCheck = !(lastChoices.includes(singleChoice));
+    let forwardCheck = !(newChoices.includes(singleChoice));
 
-    //Setup variable for the comparison loop
-    let theSame = false;
-
-    //pick a new choice
-    choice = productSelectRandom();
-
-    //create local variable 'check' which will cycle through all values in choices
-    for (let check of choicesTemp){
-
-      //If they are equal set the check to false
-      if(check === choice){
-        theSame = true;
-      }
+    //Check to make sure the lastChoices array and newChoices array do not include the singleChoice
+    if(backwardCheck && forwardCheck){
+      
+      //Add the proven unique item to newChoices array
+      newChoices.push(singleChoice);
     }
 
-    //Push value in to choices array if we never found an equal selection
-    if(!theSame){
-      choicesTemp.push(choice);
-    }
   }
 
-  //Alright, so this code changes the global array choices to be the objects and not just an index 
-  for(let i = 0; i < choicesTemp.length; i++){
-    choices[i] = Products.productArray[choicesTemp[i]];
-  }
+  //We now have the array of objects, update choices array
+  choices = newChoices;
+  
 }
 
 //Takes in the array of products and updates the productDiv elements.
@@ -139,7 +132,7 @@ function renderProducts(){
 
   //Increment the products at the selected indexs
   for (let product of choices){
-    product.timesCalled++;
+    product.timesSeen++;
     //console.log(Products.productArray[index]);
   }
 
@@ -176,15 +169,19 @@ function renderProducts(){
 }
 
 //Add list items to resultsDiv
-function printData(){
+function printDataLI(){
 
   //clear resultsDiv to make sure we avoid complication on possible repeat cases later
   resultsDiv.innerHTML = '';
 
+  const listTableHeader = document.createElement('h2');
+  listTableHeader.textContent = 'Raw Data: Chosen/Seen';
+  resultDiv.appendChild(listTableHeader);
+
   //Create li item and add it to resultsDiv for each product
   for(let product of Products.productArray){
     const productInfo = document.createElement('li');
-    productInfo.textContent = `${product.name} had ${product.clickCount} votes and was seen ${product.timesCalled} times`;
+    productInfo.textContent = `${product.name}:${product.clickCount}/${product.timesSeen}`;
     resultDiv.appendChild(productInfo);
   }
 }
@@ -212,15 +209,81 @@ function selectProduct(event) {
     renderProducts();
   } else {
     productDivHead.removeEventListener('click', selectProduct);
-    printData();
+    printDataLI();
+    printDataChart ();
+    console.log(Products.productArray);
   }
 
 }
 
+function printDataChart () {
+
+  //Initialize arrays for chart constructor
+  let chartNameArray = [];
+  let chartSeenArray = [];
+  let chartClickedArray = [];
+  let chartColorArray = [];
+  let chartColorArrayMinor = [];
+
+  //for each object in Products.productArray
+  for( let product of Products.productArray){
+
+    //add in relevant properties of each product
+    chartNameArray.push(product.name);
+    chartSeenArray.push(product.timesSeen);
+    chartClickedArray.push(product.clickCount);
+
+  }
+  
+
+
+  //create color array
+  for ( let i = 0; i < Products.productArray.length; i++){
+
+    //Modulo operator will give back 0 and 1 which the if sees as a boolean
+    if(i % 2){
+      chartColorArrayMinor.push('#3fb3da'); 
+      chartColorArray.push('#7bd5f3');  
+    }else{
+      chartColorArrayMinor.push('#3e5ec1');
+      chartColorArray.push('#6a8bee');
+    }
+  }
+
+  //Alright, actual chart time, just a copy and paste from chartjs examples
+  //Note: to add dataset add in something into datasets section like "datasets: [{X},{Y},{Z}]"
+  var context = document.getElementById('chartJSDiv').getContext('2d');
+
+  var myChart = new Chart(context, {
+      type: 'bar',
+      data: {
+        labels: chartNameArray,
+        datasets: [{
+          label: 'Times Seen',
+          data: chartSeenArray,
+          backgroundColor: chartColorArray,
+        },{
+          label: 'Times Chosen',
+          data: chartClickedArray,
+          backgroundColor: chartColorArrayMinor,
+        }],
+      },
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          }
+      }
+  });
+
+}
+
+
 
 //====================Calling====================
 
-//This function only needs to be ran once
+//This function only needs to be run once
 productDivSetup();
 
 //First run to have options to start with
