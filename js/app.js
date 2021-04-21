@@ -21,7 +21,7 @@ const canvasDiv = document.getElementById('chartJSDiv');
 
 //Variables to be used by others
 const numChoices = 3;
-const maxClicks = 10; //down to 10 for testing purposes
+const maxClicks = 25; //down to 10 for testing purposes
 productDivHead.addEventListener('click', selectProduct);
 
 //Variables others use
@@ -127,7 +127,7 @@ function selectRandom () {
 //Takes in the array of products and updates the productDiv elements.
 function renderProducts(){
 
-  //Create array of unique indexes
+  //Create array of unique products
   selectRandom();
 
   //Increment the products at the selected indexs
@@ -211,7 +211,7 @@ function selectProduct(event) {
     productDivHead.removeEventListener('click', selectProduct);
     printDataLI();
     printDataChart ();
-    console.log(Products.productArray);
+    //console.log(Products.productArray);
   }
 
 }
@@ -237,7 +237,7 @@ function printDataChart () {
   
 
 
-  //create color array
+  //create color arrays
   for ( let i = 0; i < Products.productArray.length; i++){
 
     //Modulo operator will give back 0 and 1 which the if sees as a boolean
@@ -279,6 +279,27 @@ function printDataChart () {
 
 }
 
+//Local storage
+//Do this when we are going to generate the graphs and info to have persistent info
+function updateStoredData () {
+ 
+  //Look up previous data
+  let oldData = localStorage.getItem('storedData');
+
+  //If stored data is empty and returns null just throw in current data set
+  if(oldData == null){
+
+
+  //Add current data set to stored data if both are present
+  }else{
+    //parse out previous info
+    
+    //Add previous values to current dataset
+    //parse current data set to load into storage
+    //overwrite stored data automatically by using same key
+    //clear out current data to not have it double or triple adding values with possible repeated runs
+  }
+}
 
 
 //====================Calling====================

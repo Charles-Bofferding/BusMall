@@ -110,3 +110,6 @@ li {
   list-style-position: inside;
 }
 
+#canvasDiv {
+  width: 300px;
+}
