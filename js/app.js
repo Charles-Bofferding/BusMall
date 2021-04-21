@@ -27,6 +27,7 @@ productDivHead.addEventListener('click', selectProduct);
 //Variables others use
 let userSelections = 0;
 let choices = [];
+let openedData = [];
 
 
 //====================Constructors and Methods====================
@@ -103,7 +104,7 @@ function selectRandom () {
   //Create an array of new index
   while(newChoices.length < numChoices){
 
-    //pick new product object as an option
+    //pick new product object as an option, Product.productArrays loading in stay the
     let singleChoice = Products.productArray[productSelectRandom()];
 
     //If the single choice is NOT in the array we are looking at return true
@@ -179,7 +180,7 @@ function printDataLI(){
   resultDiv.appendChild(listTableHeader);
 
   //Create li item and add it to resultsDiv for each product
-  for(let product of Products.productArray){
+  for(let product of openedData){
     const productInfo = document.createElement('li');
     productInfo.textContent = `${product.name}:${product.clickCount}/${product.timesSeen}`;
     resultDiv.appendChild(productInfo);
@@ -204,16 +205,19 @@ function selectProduct(event) {
   //increment user selections because a selection was made
   userSelections++;
 
-  //Display new products if still picks left, otherwise shut off listener and show data
+  //Display new products if still picks left
   if(userSelections < maxClicks){
     renderProducts();
+  
+  //Otherwise remove listener, update data, and work with data
   } else {
     productDivHead.removeEventListener('click', selectProduct);
+    updateOpenedData();
+    console.log(openedData);
     printDataLI();
     printDataChart ();
     //console.log(Products.productArray);
   }
-
 }
 
 function printDataChart () {
@@ -225,18 +229,15 @@ function printDataChart () {
   let chartColorArray = [];
   let chartColorArrayMinor = [];
 
-  //for each object in Products.productArray
-  for( let product of Products.productArray){
+  //for each object in opened data
+  for( let product of openedData){
 
     //add in relevant properties of each product
     chartNameArray.push(product.name);
     chartSeenArray.push(product.timesSeen);
     chartClickedArray.push(product.clickCount);
-
   }
   
-
-
   //create color arrays
   for ( let i = 0; i < Products.productArray.length; i++){
 
@@ -281,23 +282,44 @@ function printDataChart () {
 
 //Local storage
 //Do this when we are going to generate the graphs and info to have persistent info
-function updateStoredData () {
+function updateOpenedData () {
  
+  //Setup packedData in a local variable for later use
+  let packedData = '';
+
   //Look up previous data
   let oldData = localStorage.getItem('storedData');
 
-  //If stored data is empty and returns null just throw in current data set
+  //If stored data returns null just push current product array data set to openedData
   if(oldData == null){
 
+    //Just write the Products.productArray over
+    for(let product of Products.productArray){
+      openedData.push(product);
+    }
 
-  //Add current data set to stored data if both are present
+    //Add this into local storage memory
+    packedData = JSON.stringify(openedData);
+    localStorage.setItem('storedData', packedData);
+
+  //Else add current data set to stored data if both are present
   }else{
     //parse out previous info
-    
+    openedData = JSON.parse(oldData);
+
     //Add previous values to current dataset
+    for( let i = 0; i < Products.productArray.length; i++){
+
+      //change other function targets to openedData to keep continuity
+      openedData[i].timesSeen += Products.productArray[i].timesSeen;
+      openedData[i].clickCount += Products.productArray[i].clickCount;
+    }
+
     //parse current data set to load into storage
+    packedData = JSON.stringify(openedData);
+
     //overwrite stored data automatically by using same key
-    //clear out current data to not have it double or triple adding values with possible repeated runs
+    localStorage.setItem('storedData', packedData);
   }
 }
 
