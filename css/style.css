@@ -64,7 +64,7 @@ div {
 
 #resultsDiv {
   float: left;
-  height: 50%;
+  height: 100%;
   width: 15%;
   flex-direction: column;
   font-size: 0.8em;
@@ -111,5 +111,17 @@ li {
 }
 
 #canvasDiv {
-  width: 300px;
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-bottom: 5%;
+  background: #1d475f;
+  border-radius: 10%;
+  width: 60%;
+  float: right;
+  flex-direction: column;
+}
+
+#canvasDiv h2 {
+  margin-top: 4%;
+  margin-bottom: 4%;
 }
